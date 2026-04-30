@@ -25,10 +25,10 @@ from patterns.thread_safety import AtomicCounter, LockStrategy, SharedState
 # Config
 # ---------------------------------------------------------------------------
 
-_WARMUP_OPS = 5_000       # ops before timing starts (cache warm-up)
-_BENCH_OPS = 50_000       # ops per thread during measurement
+_WARMUP_OPS = 5_000  # ops before timing starts (cache warm-up)
+_BENCH_OPS = 50_000  # ops per thread during measurement
 _THREAD_COUNTS = (1, 2, 4, 8, 16)
-_SHARED_STATE_KEYS = 8    # number of keys shared across threads
+_SHARED_STATE_KEYS = 8  # number of keys shared across threads
 
 
 # ---------------------------------------------------------------------------
@@ -53,7 +53,11 @@ class BenchResult:
     @property
     def latency_us(self) -> float:
         """Average latency per operation in microseconds."""
-        return (self.elapsed_sec / self.ops_total) * 1_000_000 if self.ops_total > 0 else 0.0
+        return (
+            (self.elapsed_sec / self.ops_total) * 1_000_000
+            if self.ops_total > 0
+            else 0.0
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -115,12 +119,14 @@ def bench_atomic_counter() -> list[BenchResult]:
         counter = AtomicCounter(0)
         elapsed = _run_threads(_counter_worker, n, counter, _BENCH_OPS)
         total_ops = n * _BENCH_OPS
-        results.append(BenchResult(
-            label="AtomicCounter.increment",
-            threads=n,
-            ops_total=total_ops,
-            elapsed_sec=elapsed,
-        ))
+        results.append(
+            BenchResult(
+                label="AtomicCounter.increment",
+                threads=n,
+                ops_total=total_ops,
+                elapsed_sec=elapsed,
+            )
+        )
 
     return results
 
@@ -158,8 +164,8 @@ def bench_shared_state() -> list[BenchResult]:
     """Measure SharedState throughput: pure-read, pure-write, 80/20 mixed."""
     results: list[BenchResult] = []
     scenarios = [
-        ("SharedState pure-read",  0.0),
-        ("SharedState 80/20 mix",  0.2),
+        ("SharedState pure-read", 0.0),
+        ("SharedState 80/20 mix", 0.2),
         ("SharedState pure-write", 1.0),
     ]
 
@@ -174,12 +180,14 @@ def bench_shared_state() -> list[BenchResult]:
 
             elapsed = _run_threads(_mixed_worker, n, state, _BENCH_OPS, write_ratio)
             total_ops = n * _BENCH_OPS
-            results.append(BenchResult(
-                label=label,
-                threads=n,
-                ops_total=total_ops,
-                elapsed_sec=elapsed,
-            ))
+            results.append(
+                BenchResult(
+                    label=label,
+                    threads=n,
+                    ops_total=total_ops,
+                    elapsed_sec=elapsed,
+                )
+            )
 
     return results
 
@@ -213,14 +221,18 @@ def bench_lock_strategies(n_threads: int = 4) -> list[BenchResult]:
         # warm up
         _run_threads(_strategy_worker, n_threads, state, _WARMUP_OPS, write_ratio)
 
-        elapsed = _run_threads(_strategy_worker, n_threads, state, _BENCH_OPS, write_ratio)
+        elapsed = _run_threads(
+            _strategy_worker, n_threads, state, _BENCH_OPS, write_ratio
+        )
         total_ops = n_threads * _BENCH_OPS
-        results.append(BenchResult(
-            label=f"LockStrategy.{strategy.name}",
-            threads=n_threads,
-            ops_total=total_ops,
-            elapsed_sec=elapsed,
-        ))
+        results.append(
+            BenchResult(
+                label=f"LockStrategy.{strategy.name}",
+                threads=n_threads,
+                ops_total=total_ops,
+                elapsed_sec=elapsed,
+            )
+        )
 
     return results
 
@@ -234,7 +246,9 @@ def _print_header(title: str) -> None:
     print(f"\n{'=' * 70}")
     print(f"  {title}")
     print(f"{'=' * 70}")
-    print(f"  {'Threads':>8}  {'Throughput':>14}  {'Latency':>12}  {'Speedup vs 1T':>14}")
+    print(
+        f"  {'Threads':>8}  {'Throughput':>14}  {'Latency':>12}  {'Speedup vs 1T':>14}"
+    )
     print(f"  {'-' * 56}")
 
 
@@ -250,13 +264,17 @@ def _print_results(results: list[BenchResult], group_key: str = "label") -> None
         baseline = rows[0].throughput if rows else 1.0
         for r in rows:
             sp = _speedup(baseline, r.throughput)
-            print(f"  {r.threads:>8}  {_fmt_throughput(r.throughput):>14}  "
-                  f"{r.latency_us:>9.2f} µs  {sp:>14}")
+            print(
+                f"  {r.threads:>8}  {_fmt_throughput(r.throughput):>14}  "
+                f"{r.latency_us:>9.2f} µs  {sp:>14}"
+            )
 
 
 def _print_strategy_table(results: list[BenchResult]) -> None:
     print(f"\n{'=' * 70}")
-    print(f"  LockStrategy comparison  ({results[0].threads} threads, 80/20 read/write)")
+    print(
+        f"  LockStrategy comparison  ({results[0].threads} threads, 80/20 read/write)"
+    )
     print(f"{'=' * 70}")
     print(f"  {'Strategy':30}  {'Throughput':>14}  {'Latency':>12}  {'vs NONE':>10}")
     print(f"  {'-' * 60}")
@@ -264,8 +282,10 @@ def _print_strategy_table(results: list[BenchResult]) -> None:
     baseline = results[0].throughput if results else 1.0
     for r in results:
         sp = _speedup(baseline, r.throughput)
-        print(f"  {r.label:<30}  {_fmt_throughput(r.throughput):>14}  "
-              f"{r.latency_us:>9.2f} µs  {sp:>10}")
+        print(
+            f"  {r.label:<30}  {_fmt_throughput(r.throughput):>14}  "
+            f"{r.latency_us:>9.2f} µs  {sp:>10}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -306,8 +326,10 @@ def main() -> None:
     ctr_8t = next((r for r in counter_results if r.threads == 8), None)
     if ctr_1t and ctr_8t:
         ratio = ctr_8t.throughput / ctr_1t.throughput if ctr_1t.throughput > 0 else 0
-        print(f"  AtomicCounter 1T→8T scaling: {ratio:.2f}x "
-              f"({'good' if ratio >= 1.5 else 'expected: lock contention limits scaling'})")
+        print(
+            f"  AtomicCounter 1T→8T scaling: {ratio:.2f}x "
+            f"({'good' if ratio >= 1.5 else 'expected: lock contention limits scaling'})"
+        )
 
     none_r = next((r for r in strategy_results if r.label.endswith("NONE")), None)
     mutex_r = next((r for r in strategy_results if r.label.endswith("MUTEX")), None)

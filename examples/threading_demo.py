@@ -53,7 +53,9 @@ def demo_atomic_counter() -> None:
     # --- SAFE ---
     safe_counter = AtomicCounter(0)
     threads = [
-        threading.Thread(target=_safe_worker, args=(safe_counter, _INCREMENTS_PER_THREAD))
+        threading.Thread(
+            target=_safe_worker, args=(safe_counter, _INCREMENTS_PER_THREAD)
+        )
         for _ in range(_NUM_THREADS)
     ]
     for t in threads:
@@ -62,13 +64,17 @@ def demo_atomic_counter() -> None:
         t.join()
 
     safe_result = safe_counter.get()
-    print(f"  [SAFE]   Expected={expected:,}  Got={safe_result:,}  "
-          f"{'OK' if safe_result == expected else 'CORRUPTED'}")
+    print(
+        f"  [SAFE]   Expected={expected:,}  Got={safe_result:,}  "
+        f"{'OK' if safe_result == expected else 'CORRUPTED'}"
+    )
 
     # --- UNSAFE ---
     unsafe_shared: list[int] = [0]
     threads = [
-        threading.Thread(target=_unsafe_worker, args=(unsafe_shared, _INCREMENTS_PER_THREAD))
+        threading.Thread(
+            target=_unsafe_worker, args=(unsafe_shared, _INCREMENTS_PER_THREAD)
+        )
         for _ in range(_NUM_THREADS)
     ]
     for t in threads:
@@ -166,7 +172,10 @@ def demo_race_condition() -> None:
     # Broken version: unprotected global
     global _race_total  # noqa: PLW0603
     _race_total = 0
-    threads = [threading.Thread(target=_unsafe_increment, args=(n_ops,)) for _ in range(n_threads)]
+    threads = [
+        threading.Thread(target=_unsafe_increment, args=(n_ops,))
+        for _ in range(n_threads)
+    ]
     for t in threads:
         t.start()
     for t in threads:
@@ -174,22 +183,33 @@ def demo_race_condition() -> None:
 
     broken_result = _race_total
     lost = expected - broken_result
-    print(f"  [BROKEN] Expected={expected:,}  Got={broken_result:,}  Lost={lost:,} updates")
-    print("           Root cause: `x += 1` is 3 bytecodes — not atomic under free-threading")
+    print(
+        f"  [BROKEN] Expected={expected:,}  Got={broken_result:,}  Lost={lost:,} updates"
+    )
+    print(
+        "           Root cause: `x += 1` is 3 bytecodes — not atomic under free-threading"
+    )
     print()
 
     # Fixed version: AtomicCounter
     fixed_counter = AtomicCounter(0)
-    threads = [threading.Thread(target=_safe_increment, args=(fixed_counter, n_ops)) for _ in range(n_threads)]
+    threads = [
+        threading.Thread(target=_safe_increment, args=(fixed_counter, n_ops))
+        for _ in range(n_threads)
+    ]
     for t in threads:
         t.start()
     for t in threads:
         t.join()
 
     fixed_result = fixed_counter.get()
-    print(f"  [FIXED]  Expected={expected:,}  Got={fixed_result:,}  "
-          f"{'OK — no lost updates' if fixed_result == expected else 'UNEXPECTED MISMATCH'}")
-    print("           Fix: use AtomicCounter.increment() — internally serialized with Lock")
+    print(
+        f"  [FIXED]  Expected={expected:,}  Got={fixed_result:,}  "
+        f"{'OK — no lost updates' if fixed_result == expected else 'UNEXPECTED MISMATCH'}"
+    )
+    print(
+        "           Fix: use AtomicCounter.increment() — internally serialized with Lock"
+    )
     print()
 
 
@@ -198,7 +218,9 @@ def demo_race_condition() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _cas_worker(counter: AtomicCounter, target: int, results: list[bool], idx: int) -> None:
+def _cas_worker(
+    counter: AtomicCounter, target: int, results: list[bool], idx: int
+) -> None:
     """Try to CAS the counter from target to target+1."""
     results[idx] = counter.compare_and_set(target, target + 1)
 
@@ -223,7 +245,9 @@ def demo_compare_and_set() -> None:
     wins = sum(results)
     print(f"  CAS(42 -> 43): {wins} thread(s) succeeded out of 10")
     print(f"  Counter final value: {counter.get()}")
-    print(f"  {'Correct — exactly one CAS winner' if wins == 1 else 'WARNING: unexpected result'}")
+    print(
+        f"  {'Correct — exactly one CAS winner' if wins == 1 else 'WARNING: unexpected result'}"
+    )
     print()
 
 

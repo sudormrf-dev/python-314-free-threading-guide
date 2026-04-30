@@ -46,7 +46,9 @@ def pattern1_before() -> int:
     """Run the broken version; return final value."""
     global _old_counter  # noqa: PLW0603
     _old_counter = 0
-    threads = [threading.Thread(target=_old_increment) for _ in range(_N_THREADS * _N_OPS)]
+    threads = [
+        threading.Thread(target=_old_increment) for _ in range(_N_THREADS * _N_OPS)
+    ]
     for t in threads:
         t.start()
     for t in threads:
@@ -58,8 +60,7 @@ def pattern1_after() -> int:
     """Run the fixed version with AtomicCounter; return final value."""
     counter = AtomicCounter(0)
     threads = [
-        threading.Thread(target=counter.increment)
-        for _ in range(_N_THREADS * _N_OPS)
+        threading.Thread(target=counter.increment) for _ in range(_N_THREADS * _N_OPS)
     ]
     for t in threads:
         t.start()
@@ -294,7 +295,9 @@ def main() -> None:
     b1 = pattern1_before()
     a1 = pattern1_after()
     lost = expected - b1
-    print(f"  Before result: {b1:,} (lost {lost:,} updates{'!' if lost > 0 else ' — lucky run'})")
+    print(
+        f"  Before result: {b1:,} (lost {lost:,} updates{'!' if lost > 0 else ' — lucky run'})"
+    )
     print(f"  After  result: {a1:,} ({'correct' if a1 == expected else 'ERROR'})")
 
     # -- Pattern 2 --
@@ -306,9 +309,13 @@ def main() -> None:
     )
     b2 = pattern2_before()
     a2 = pattern2_after()
-    print(f"  Before entries: {b2:,} / {expected:,} "
-          f"({'OK' if b2 == expected else f'missing {expected - b2:,}'})")
-    print(f"  After  entries: {a2:,} / {expected:,} ({'correct' if a2 == expected else 'ERROR'})")
+    print(
+        f"  Before entries: {b2:,} / {expected:,} "
+        f"({'OK' if b2 == expected else f'missing {expected - b2:,}'})"
+    )
+    print(
+        f"  After  entries: {a2:,} / {expected:,} ({'correct' if a2 == expected else 'ERROR'})"
+    )
 
     # -- Pattern 3 --
     _print_pattern(
@@ -331,9 +338,13 @@ def main() -> None:
     )
     b4 = pattern4_before()
     a4 = pattern4_after()
-    print(f"  Before count: {b4:,} / {expected:,} "
-          f"({'OK' if b4 == expected else f'lost {expected - b4:,}'})")
-    print(f"  After  count: {a4:,} / {expected:,} ({'correct' if a4 == expected else 'ERROR'})")
+    print(
+        f"  Before count: {b4:,} / {expected:,} "
+        f"({'OK' if b4 == expected else f'lost {expected - b4:,}'})"
+    )
+    print(
+        f"  After  count: {a4:,} / {expected:,} ({'correct' if a4 == expected else 'ERROR'})"
+    )
 
     # -- Pattern 5 --
     _print_pattern(
@@ -344,9 +355,13 @@ def main() -> None:
     )
     b5 = pattern5_before()
     a5 = pattern5_after()
-    print(f"  Before hits: {b5} / {_N_THREADS} "
-          f"({'correct' if b5 == _N_THREADS else f'lost {_N_THREADS - b5}'})")
-    print(f"  After  hits: {a5} / {_N_THREADS} ({'correct' if a5 == _N_THREADS else 'ERROR'})")
+    print(
+        f"  Before hits: {b5} / {_N_THREADS} "
+        f"({'correct' if b5 == _N_THREADS else f'lost {_N_THREADS - b5}'})"
+    )
+    print(
+        f"  After  hits: {a5} / {_N_THREADS} ({'correct' if a5 == _N_THREADS else 'ERROR'})"
+    )
 
     print(f"\n{_SEP}")
     print("Migration guide complete. Fix every BEFORE pattern before removing the GIL.")
