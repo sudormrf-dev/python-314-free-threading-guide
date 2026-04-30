@@ -38,13 +38,13 @@ _old_counter = 0
 
 def _old_increment() -> None:
     """Before: plain global — broken under free-threading."""
-    global _old_counter  # noqa: PLW0603
+    global _old_counter
     _old_counter += 1  # NOT atomic: LOAD_FAST + BINARY_ADD + STORE_FAST
 
 
 def pattern1_before() -> int:
     """Run the broken version; return final value."""
-    global _old_counter  # noqa: PLW0603
+    global _old_counter
     _old_counter = 0
     threads = [
         threading.Thread(target=_old_increment) for _ in range(_N_THREADS * _N_OPS)
@@ -123,7 +123,7 @@ _bad_singleton: dict[str, Any] | None = None  # DCL broken without GIL
 
 def _get_bad_singleton() -> dict[str, Any]:
     """Before: double-checked locking — BROKEN under free-threading."""
-    global _bad_singleton  # noqa: PLW0603
+    global _bad_singleton
     if _bad_singleton is None:  # check 1 — not protected
         # another thread can reach here simultaneously
         if _bad_singleton is None:  # check 2 — still racy
@@ -146,7 +146,7 @@ _locked_singleton: dict[str, Any] | None = None
 
 def _get_locked_singleton() -> dict[str, Any]:
     """After (alternative): proper lock-based lazy init."""
-    global _locked_singleton  # noqa: PLW0603
+    global _locked_singleton
     if _locked_singleton is None:
         with _singleton_lock:
             if _locked_singleton is None:

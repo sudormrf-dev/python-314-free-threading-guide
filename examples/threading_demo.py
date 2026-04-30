@@ -148,7 +148,7 @@ _race_lock = threading.Lock()
 
 def _unsafe_increment(n: int) -> None:
     """Increment module-level counter without any protection."""
-    global _race_total  # noqa: PLW0603
+    global _race_total
     for _ in range(n):
         _race_total += 1  # read-modify-write: NOT atomic
 
@@ -170,7 +170,7 @@ def demo_race_condition() -> None:
     expected = n_threads * n_ops
 
     # Broken version: unprotected global
-    global _race_total  # noqa: PLW0603
+    global _race_total
     _race_total = 0
     threads = [
         threading.Thread(target=_unsafe_increment, args=(n_ops,))
